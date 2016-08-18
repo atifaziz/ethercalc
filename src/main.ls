@@ -1,5 +1,8 @@
 @include = ->
-  @use \json, @app.router, @express.static __dirname
+  @use do
+    require \body-parser .json!
+    #TODO @app.router
+    @express.static __dirname
   @app.use \/edit @express.static __dirname
   @app.use \/view @express.static __dirname
   @app.use \/app @express.static __dirname
