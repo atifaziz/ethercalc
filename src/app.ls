@@ -12,7 +12,7 @@ This work is published from Taiwan.
 slurp = -> require \fs .readFileSync it, \utf8
 argv = (try require \optimist .boolean <[ vm polling cors ]> .argv) || {}
 json = try JSON.parse slurp \/home/dotcloud/environment.json
-port = Number(argv.port or json?PORT_NODEJS or process.env.PORT or process.env.VCAP_APP_PORT or process.env.OPENSHIFT_NODEJS_PORT) or 8000
+port = argv.port or json?PORT_NODEJS or process.env.PORT or process.env.VCAP_APP_PORT or process.env.OPENSHIFT_NODEJS_PORT or 8000
 host = argv.host or process.env.VCAP_APP_HOST or process.env.OPENSHIFT_NODEJS_IP or \0.0.0.0
 basepath = (argv.basepath or "") - //  /$  //
 
@@ -26,9 +26,14 @@ if keyfile? and certfile?
   transport = \https
 else options = {}
 
-console.log "Please connect to: #transport://#{
-  if host is \0.0.0.0 then require \os .hostname! else host
-}:#port/"
+if isNaN Number port # then assume IPC path
+  options.path = port
+  console.log "Serving on IPC port/path #port"
+  host = port = null # avoids confusion
+else
+  console.log "Please connect to: #transport://#{
+    if host is \0.0.0.0 then require \os .hostname! else host
+  }:#port/"
 
 options.io = { origin: '*' } if cors
 
